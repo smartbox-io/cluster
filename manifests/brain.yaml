@@ -1,0 +1,32 @@
+apiVersion: extensions/v1beta1
+kind: Deployment
+metadata:
+  name: brain
+spec:
+  replicas: 1
+  template:
+    metadata:
+      labels:
+        app: brain
+    spec:
+      nodeSelector:
+        type: brain
+      containers:
+        - name: brain
+          image: smartbox/brain
+          args: ["bundle", "exec", "rails", "server", "-p", "80", "-b", "0.0.0.0"]
+          env:
+            - name: REDIS_HOST
+              value: localhost
+          ports:
+            - containerPort: 80
+        - name: brain-worker
+          image: smartbox/brain
+          args: ["bundle", "exec", "sidekiq"]
+          env:
+            - name: REDIS_HOST
+              value: localhost
+        - name: mongo
+          image: mongo
+        - name: redis
+          image: redis

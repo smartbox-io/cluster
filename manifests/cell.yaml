@@ -1,0 +1,21 @@
+apiVersion: extensions/v1beta1
+kind: DaemonSet
+metadata:
+  name: cell
+spec:
+  selector:
+      matchLabels:
+        name: cell
+  template:
+    metadata:
+      labels:
+        name: cell
+    spec:
+      nodeSelector:
+        type: cell
+      containers:
+        - name: cell
+          image: smartbox/cell
+          args: ["bundle", "exec", "rails", "server", "-p", "80", "-b", "0.0.0.0"]
+          ports:
+            - containerPort: 80
