@@ -1,3 +1,15 @@
+apiVersion: v1
+kind: Service
+metadata:
+  name: brain
+  labels:
+    run: brain
+spec:
+  ports:
+    - port: 80
+  selector:
+    app: brain
+---
 apiVersion: extensions/v1beta1
 kind: Deployment
 metadata:
