@@ -23,18 +23,6 @@ spec:
       annotations:
         pod.beta.kubernetes.io/init-containers: '[
           {
-            "name": "setup-database",
-            "image": "smartbox/brain",
-            "imagePullPolicy": "Always",
-            "env": [
-              {
-                "name": "RAILS_ENV",
-                "value": "production"
-              }
-            ],
-            "command": ["bundle", "exec", "rake", "db:setup"]
-          },
-          {
             "name": "migrate-database",
             "image": "smartbox/brain",
             "imagePullPolicy": "Always",
