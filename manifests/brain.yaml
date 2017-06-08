@@ -20,25 +20,53 @@ spec:
     metadata:
       labels:
         app: brain
+      annotations:
+        pod.beta.kubernetes.io/init-containers: '[
+          {
+            "name": "setup-database",
+            "image": "smartbox/brain",
+            "imagePullPolicy": "Always",
+            "env": [
+              {
+                "name": "RAILS_ENV",
+                "value": "production"
+              }
+            ],
+            "command": ["bundle", "exec", "rake", "db:setup"]
+          },
+          {
+            "name": "migrate-database",
+            "image": "smartbox/brain",
+            "imagePullPolicy": "Always",
+            "env": [
+              {
+                "name": "RAILS_ENV",
+                "value": "production"
+              }
+            ],
+            "command": ["bundle", "exec", "rake", "db:migrate"]
+          }
+        ]'
     spec:
       nodeSelector:
         type: brain
       containers:
         - name: brain
           image: smartbox/brain
-          args: ["bundle", "exec", "rails", "server", "-p", "80", "-b", "0.0.0.0"]
+          command: ["bundle", "exec", "rails", "server", "-p", "80", "-b", "0.0.0.0"]
           env:
-            - name: REDIS_HOST
-              value: localhost
+            - name: RAILS_ENV
+              value: production
+            - name: SECRET_KEY_BASE
+              valueFrom:
+                secretKeyRef:
+                  name: brain-secrets
+                  key: secret_key_base
           ports:
             - containerPort: 80
         - name: brain-worker
           image: smartbox/brain
-          args: ["bundle", "exec", "sidekiq"]
+          command: ["bundle", "exec", "sidekiq"]
           env:
-            - name: REDIS_HOST
-              value: localhost
-        - name: mongo
-          image: mongo
-        - name: redis
-          image: redis
+            - name: RAILS_ENV
+              value: production

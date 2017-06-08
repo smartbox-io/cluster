@@ -16,6 +16,16 @@ spec:
       containers:
         - name: cell
           image: smartbox/cell
-          args: ["bundle", "exec", "rails", "server", "-p", "80", "-b", "0.0.0.0"]
+          command: ["bundle", "exec", "rails", "server", "-p", "80", "-b", "0.0.0.0"]
+          env:
+            - name: RAILS_ENV
+              value: production
           ports:
             - containerPort: 80
+          volumeMounts:
+            - mountPath: /volumes
+              name: volumes
+      volumes:
+        - name: volumes
+          hostPath:
+            path: /volumes
