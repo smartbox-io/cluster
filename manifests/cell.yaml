@@ -25,7 +25,13 @@ spec:
           volumeMounts:
             - mountPath: /volumes
               name: volumes
+          volumeMounts:
+            - mountPath: /etc/brain
+              name: brain-config
       volumes:
         - name: volumes
           hostPath:
             path: /volumes
+        - name: brain-config
+          hostPath:
+            path: /etc/brain
