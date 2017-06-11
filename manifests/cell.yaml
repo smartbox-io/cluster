@@ -33,6 +33,10 @@ spec:
           env:
             - name: RAILS_ENV
               value: production
+            - name: HOST_IP_ADDRESS
+              valueFrom:
+                fieldRef:
+                  fieldPath: spec.nodeName
           ports:
             - containerPort: 80
           volumeMounts:

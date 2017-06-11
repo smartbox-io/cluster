@@ -28,7 +28,10 @@ spec:
           image: mysql
           env:
             - name: MYSQL_ROOT_PASSWORD
-              value: root
+              valueFrom:
+                secretKeyRef:
+                  name: brain-secrets
+                  key: mysql_root_password
           volumeMounts:
             - mountPath: /var/lib/mysql
               name: mysql-data

@@ -52,6 +52,11 @@ spec:
                 secretKeyRef:
                   name: brain-secrets
                   key: secret_key_base
+            - name: MYSQL_PASSWORD
+              valueFrom:
+                secretKeyRef:
+                  name: brain-secrets
+                  key: mysql_root_password
           ports:
             - containerPort: 80
         - name: brain-worker
@@ -60,3 +65,8 @@ spec:
           env:
             - name: RAILS_ENV
               value: production
+            - name: MYSQL_PASSWORD
+              valueFrom:
+                secretKeyRef:
+                  name: brain-secrets
+                  key: mysql_root_password
