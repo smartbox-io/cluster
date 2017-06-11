@@ -39,12 +39,12 @@ spec:
             - mountPath: /volumes
               name: volumes
           volumeMounts:
-            - mountPath: /etc/brain
-              name: brain-config
+            - mountPath: /etc/cell
+              name: cell-config
       volumes:
         - name: volumes
           hostPath:
             path: /volumes
-        - name: brain-config
+        - name: cell-config
           hostPath:
-            path: /etc/brain
+            path: /etc/cell
