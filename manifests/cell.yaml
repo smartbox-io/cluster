@@ -34,6 +34,11 @@ spec:
           env:
             - name: RAILS_ENV
               value: production
+            - name: SECRET_KEY_BASE
+              valueFrom:
+                secretKeyRef:
+                  name: cell-secrets
+                  key: secret_key_base
             - name: HOST_IP_ADDRESS
               valueFrom:
                 fieldRef:
