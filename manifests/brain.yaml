@@ -7,8 +7,7 @@ metadata:
 spec:
   ports:
     - port: 80
-      nodePort: 30000
-  type: NodePort
+      targetPort: 80
   selector:
     app: brain
 ---
@@ -40,6 +39,7 @@ spec:
     spec:
       nodeSelector:
         type: brain
+      hostNetwork: true
       containers:
         - name: brain
           image: smartbox/brain
