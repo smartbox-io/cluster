@@ -1,15 +1,123 @@
 apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: brain-config
+data:
+  nginx.ingress.conf: |
+    upstream brain {
+      server unix:///run/brain/brain.sock;
+    }
+    server {
+      listen 80;
+      keepalive_timeout 5;
+      location / {
+        proxy_set_header X-Real-IP         $remote_addr;
+        proxy_set_header X-Forwarded-For   $proxy_add_x_forwarded_for;
+        proxy_set_header X-Forwarded-Proto http;
+        proxy_set_header Host              $http_host;
+        proxy_redirect                     off;
+        proxy_pass                         http://brain;
+      }
+    }
+  nginx.internal.conf: |
+    upstream brain {
+      server unix:///run/brain/brain.sock;
+    }
+    server {
+      listen 8000;
+      keepalive_timeout 5;
+      location / {
+        proxy_set_header X-Real-IP         $remote_addr;
+        proxy_set_header X-Forwarded-For   $proxy_add_x_forwarded_for;
+        proxy_set_header X-Forwarded-Proto http;
+        proxy_set_header Host              $http_host;
+        proxy_redirect                     off;
+        proxy_pass                         http://brain;
+      }
+    }
+---
+apiVersion: extensions/v1beta1
+kind: DaemonSet
+metadata:
+  name: brain-ingress
+spec:
+  template:
+    metadata:
+      labels:
+        app: brain-ingress
+    spec:
+      hostNetwork: true
+      nodeSelector:
+        type: brain
+      containers:
+        - name: brain-ingress
+          image: nginx
+          env:
+            - name: NGINX_PORT
+              value: "80"
+          volumeMounts:
+            - name: nginx-config
+              mountPath: /etc/nginx/conf.d
+            - name: brain-runtime
+              mountPath: /run/brain
+      volumes:
+        - name: nginx-config
+          configMap:
+            name: brain-config
+            items:
+              - key: nginx.ingress.conf
+                path: nginx.conf
+        - name: brain-runtime
+          hostPath:
+            path: /run/brain
+---
+apiVersion: v1
 kind: Service
 metadata:
   name: brain
   labels:
     run: brain
 spec:
+  type: ClusterIP
   ports:
-    - port: 80
-      targetPort: 80
+    - port: 8000
   selector:
-    app: brain
+    app: brain-internal
+---
+apiVersion: extensions/v1beta1
+kind: Deployment
+metadata:
+  name: brain-internal
+spec:
+  replicas: 1
+  template:
+    metadata:
+      labels:
+        app: brain-internal
+    spec:
+      nodeSelector:
+        type: brain
+      containers:
+        - name: brain-internal
+          image: nginx
+          env:
+            - name: NGINX_PORT
+              value: "8000"
+          volumeMounts:
+            - name: nginx-config
+              mountPath: /etc/nginx/conf.d
+            - name: brain-runtime
+              mountPath: /run/brain
+      volumes:
+        - name: nginx-config
+          configMap:
+            name: brain-config
+            items:
+              - key: nginx.internal.conf
+                path: nginx.conf
+        - name: brain-runtime
+          hostPath:
+            path: /run/brain
 ---
 apiVersion: extensions/v1beta1
 kind: Deployment
@@ -33,17 +141,16 @@ spec:
                 "value": "production"
               }
             ],
-            "command": ["bundle", "exec", "rake", "db:migrate"]
+            "command": ["rake", "db:migrate"]
           }
         ]'
     spec:
       nodeSelector:
         type: brain
-      hostNetwork: true
       containers:
         - name: brain
           image: smartbox/brain
-          command: ["bundle", "exec", "rails", "server", "-p", "80", "-b", "0.0.0.0"]
+          command: ["puma", "-C", "/brain/config/puma.rb"]
           env:
             - name: RAILS_ENV
               value: production
@@ -57,11 +164,12 @@ spec:
                 secretKeyRef:
                   name: brain-secrets
                   key: mysql_root_password
-          ports:
-            - containerPort: 80
+          volumeMounts:
+            - mountPath: /run/brain
+              name: brain-runtime
         - name: brain-worker
           image: smartbox/brain
-          command: ["bundle", "exec", "sidekiq"]
+          command: ["sidekiq"]
           env:
             - name: RAILS_ENV
               value: production
@@ -70,3 +178,7 @@ spec:
                 secretKeyRef:
                   name: brain-secrets
                   key: mysql_root_password
+      volumes:
+        - name: brain-runtime
+          hostPath:
+            path: /run/brain
