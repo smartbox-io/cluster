@@ -76,7 +76,6 @@ spec:
               name: cell-runtime
             - mountPath: /cell
               name: smartbox-dev
-              subPath: cell
       volumes:
         - name: volumes
           hostPath:
@@ -88,5 +87,5 @@ spec:
           hostPath:
             path: /run/cell
         - name: smartbox-dev
-          persistentVolumeClaim:
-            claimName: smartbox-dev-nfs
+          hostPath:
+            path: /smartbox-io/cell

@@ -139,7 +139,6 @@ spec:
               name: brain-runtime
             - mountPath: /brain
               name: smartbox-dev
-              subPath: brain
         - name: brain-worker
           image: smartbox/brain
           command: ["sidekiq"]
@@ -157,11 +156,10 @@ spec:
           volumeMounts:
             - mountPath: /brain
               name: smartbox-dev
-              subPath: brain
       volumes:
         - name: brain-runtime
           hostPath:
             path: /run/brain
         - name: smartbox-dev
-          persistentVolumeClaim:
-            claimName: smartbox-dev-nfs
+          hostPath:
+            path: /smartbox-io/brain
