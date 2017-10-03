@@ -74,8 +74,6 @@ spec:
               name: cell-config
             - mountPath: /run/cell
               name: cell-runtime
-            - mountPath: /cell
-              name: smartbox-dev
       volumes:
         - name: volumes
           hostPath:
@@ -86,6 +84,3 @@ spec:
         - name: cell-runtime
           hostPath:
             path: /run/cell
-        - name: smartbox-dev
-          hostPath:
-            path: /smartbox-io/cell
