@@ -1,7 +1,6 @@
 pipeline {
   agent any
   parameters {
-    string(name: "INTEGRATION_BRANCH", defaultValue: "master", description: "Integration project branch to build with")
     string(name: "CELL_NUMBER", defaultValue: "1", description: "Integration. Number of cells to deploy")
   }
   stages {
@@ -15,9 +14,9 @@ pipeline {
     stage("Integration tests") {
       steps {
         script {
-          build job: "integration/${INTEGRATION_BRANCH}", parameters: [
-            string(name: "COMMIT_MESSAGE", value: GIT_COMMIT_MESSAGE),
-            string(name: "CLUSTER_BRANCH", value: GIT_BRANCH),
+          build job: "integration/master", parameters: [
+            text(name: "COMMIT_MESSAGE", value: GIT_COMMIT_MESSAGE),
+            string(name: "CLUSTER_PR", value: CHANGE_ID),
             string(name: "CELL_NUMBER", value: CELL_NUMBER)
           ]
         }
