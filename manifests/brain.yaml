@@ -92,29 +92,20 @@ spec:
     metadata:
       labels:
         app: brain
-      annotations:
-        pod.beta.kubernetes.io/init-containers: '[
-          {
-            "name": "migrate-database",
-            "image": "smartbox/brain",
-            "imagePullPolicy": "Always",
-            "env": [
-              {
-                "name": "RAILS_ENV",
-                "valueFrom": {
-                  "configMapKeyRef": {
-                    "name": "brain-config",
-                    "key": "rails.env"
-                  }
-                }
-              }
-            ],
-            "command": ["rake", "db:migrate"]
-          }
-        ]'
     spec:
       nodeSelector:
         type: brain
+      initContainers:
+        - name: migrate-database
+          image: smartbox/brain
+          imagePullPolicy: Always
+          env:
+            - name: RAILS_ENV
+              valueFrom:
+                configMapKeyRef:
+                  name: brain-config
+                  key: rails.env
+          command: ["rake", "db:migrate"]
       containers:
         - name: brain
           image: smartbox/brain
