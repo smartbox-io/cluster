@@ -96,6 +96,26 @@ spec:
       nodeSelector:
         type: brain
       initContainers:
+        - name: create-database
+          image: smartbox/brain
+          imagePullPolicy: Always
+          env:
+            - name: RAILS_ENV
+              valueFrom:
+                configMapKeyRef:
+                  name: brain-config
+                  key: rails.env
+          command: ["rake", "db:create"]
+        - name: load-schema
+          image: smartbox/brain
+          imagePullPolicy: Always
+          env:
+            - name: RAILS_ENV
+              valueFrom:
+                configMapKeyRef:
+                  name: brain-config
+                  key: rails.env
+          command: ["rake", "db:schema:load"]
         - name: migrate-database
           image: smartbox/brain
           imagePullPolicy: Always
