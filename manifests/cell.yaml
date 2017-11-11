@@ -14,7 +14,7 @@ spec:
         type: cell
       containers:
         - name: cell-ingress
-          image: nginx
+          image: nginx:1.13.6
           env:
             - name: NGINX_PORT
               value: "80"
