@@ -69,16 +69,21 @@ spec:
                 fieldRef:
                   fieldPath: spec.nodeName
           volumeMounts:
-            - mountPath: /volumes
-              name: volumes
+            - mountPath: /dev
+              name: dev
+            - mountPath: /sys/block
+              name: sys-block
             - mountPath: /etc/cell
               name: cell-config
             - mountPath: /run/cell
               name: cell-runtime
       volumes:
-        - name: volumes
+        - name: dev
           hostPath:
-            path: /volumes
+            path: /dev
+        - name: sys-block
+          hostPath:
+            path: /sys/block
         - name: cell-config
           hostPath:
             path: /etc/cell
