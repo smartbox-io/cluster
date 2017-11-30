@@ -79,6 +79,40 @@ spec:
               name: cell-config
             - mountPath: /run/cell
               name: cell-runtime
+        - name: cell-worker
+          image: smartbox/cell
+          command: ["sidekiq"]
+          env:
+            - name: RAILS_ENV
+              valueFrom:
+                configMapKeyRef:
+                  name: cell-config
+                  key: rails.env
+            - name: SECRET_KEY_BASE
+              valueFrom:
+                secretKeyRef:
+                  name: cell-secrets
+                  key: secret_key_base
+            - name: HOST_IP_ADDRESS
+              valueFrom:
+                fieldRef:
+                  fieldPath: spec.nodeName
+          securityContext:
+            privileged: True
+          volumeMounts:
+            - mountPath: /dev
+              name: dev
+            - mountPath: /sys/block
+              name: sys-block
+            - mountPath: /etc/cell
+              name: cell-config
+            - mountPath: /run/cell
+              name: cell-runtime
+        - name: redis
+          image: redis:4.0.2
+          volumeMounts:
+            - mountPath: /var/lib/redis
+              name: redis-data
       volumes:
         - name: dev
           hostPath:
@@ -92,3 +126,6 @@ spec:
         - name: cell-runtime
           hostPath:
             path: /run/cell
+        - name: redis-data
+          hostPath:
+            path: /var/lib/redis
