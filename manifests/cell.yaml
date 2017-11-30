@@ -68,6 +68,8 @@ spec:
               valueFrom:
                 fieldRef:
                   fieldPath: spec.nodeName
+          securityContext:
+            privileged: True
           volumeMounts:
             - mountPath: /dev
               name: dev
